@@ -9,12 +9,12 @@ import UltimateCard from "@/Components/UltimateCard.vue";
 const props = defineProps({
     card: {
         type: Object,
-        required: true
+        required: true,
     },
     cardType: {
         type: String,
         required: true,
-    }
+    },
 });
 // #Course Page
 
@@ -58,64 +58,190 @@ const props = defineProps({
 // "created_at": "2024-11-12T13:34:38.000000Z",
 // "updated_at": "2024-11-12T13:34:38.000000Z" } ]
 
-
-
-
-
 const check = (cardType) => {
+    const baseCard = {
+        title: props.card.title,
+        subtitle: [
+            {
+                text: props.card.course_code,
+            },
+        ],
+        content: [{ text: props.card.content }],
+        contentType: "text",
+        button: [
+            {
+                label: "View",
+                link: "#",
+            },
+        ],
+    };
     //{title, url, 1 button}
     switch (cardType) {
-        case 'course_ongoing':
-            case 'course_completed':
+        case "course_ongoing":
+        case "course_completed":
             return {
-                title: props.card.name,
-                subtitle: [{ text: props.card.course_code}],
-                contentType: 'progress',
-                content: [{
-                    label: 'Course Completed', progress: props.card.progress
-                }],
-                button: [{
-                    label: 'View Course', link: `${route('course.show', {course: props.card.id, tab: 'slides'})}`,
-                }],
-            }
-        case 'course_slides':
-            return {
-                title: props.card.title,
-                button: [{
-                    label: 'Download', link: `${props.card.url}`,
-                }],
-            }
-        case 'course_forum_posts':
-            return {
-            title: props.card.title,
-            content: [{text: props.card.content}],
-            contentType: 'text',
-                tag: "Unsolved",
-                button: [{
-                    label: 'Join Discussion', link: `#`,
-                }]
-        }
-        case 'assignment_remaining':
-            case 'assignment_results':
-            return {
-                title: props.card.title,
-                subtitle: [{text: props.card.course_code},
-                    {text: props.card.course_name}
+                ...baseCard,
+                contentType: "progress",
+                content: [
+                    {
+                        label: "Course Completed",
+                        progress: props.card.progress,
+                    },
+                ],
+                button: [
+                    {
+                        label: "View Course",
+                        link: `${route("course.show", {
+                            course: props.card.id,
+                            tab: "slides",
+                        })}`,
+                    },
+                ],
+            };
+
+        case "assignment_remaining":
+        case "assignment_results":
+        case "quiz_remaining":
+        case "quiz_results":
+            const isResultsTab = cardType.endsWith("_results");
+            const type = cardType.startsWith("assignment")
+                ? "Assignment"
+                : "Quiz";
+
+            const card = {
+                ...baseCard,
+                subtitle: [
+                    { text: props.card.course_code },
+                    { text: props.card.course_title },
                 ],
                 tag: {
-                    label:`${props.card.is_submitted ? 'Submitted' : 'Pending'}`,
-                    color: `${props.card.is_submitted ? 'green' : 'yellow'}`,
+                    label: `${
+                        props.card.is_submitted ? "Submitted" : "Pending"
+                    }`,
+                    color: `${props.card.is_submitted ? "green" : "yellow"}`,
                 },
-                contentType: 'text',
-                content: [
-                    {text: `Due Date: ${props.card.due_date}`},
+                content: [{ text: `Due Date: ${props.card.due_date}` }],
+                button: [
+                    {
+                        label: `${
+                            props.card.is_submitted
+                                ? "View Submission"
+                                : "Submit " + type
+                        }`,
+                        link: `#`,
+                    },
                 ],
-                button: [{
-                    label: `${props.card.is_submitted ? 'View Submission' : 'Submit Assignment'}`, link: `#`,
-                }],
+            };
+            if (isResultsTab) {
+                card.contentType = "text";
+                card.content = [
+                    {
+                        text: `Grade: ${
+                            props.card.grade
+                                ? props.card.grade
+                                : "Result not come out yet"
+                        }`,
+                        style: `${
+                            props.card.grade
+                                ? "font-bold text-green-700"
+                                : "font-bold"
+                        }`,
+                    },
+                    {
+                        text: `Due Date: ${props.card.due_date}`,
+                        style: "text-xs text-gray-500",
+                    },
+                ];
+                if (type === "Assignment") {
+                    card.button = [];
+                }
             }
+
+            return card;
+
+        //
+
+        case "course_slides":
+            return {
+                title: props.card.title,
+                button: [
+                    {
+                        label: "Download",
+                        link: `${props.card.url}`,
+                    },
+                ],
+            };
+        case "course_forum_posts":
+            return {
+                title: props.card.title,
+                content: [{ text: props.card.content }],
+                contentType: "text",
+                tag: "Unsolved",
+                button: [
+                    {
+                        label: "Join Discussion",
+                        link: `#`,
+                    },
+                ],
+            };
+        /* case "assignment_remaining":
+        case "assignment_results":
+            return {
+                title: props.card.title,
+                subtitle: [
+                    { text: props.card.course_code },
+                    { text: props.card.course_name },
+                ],
+                tag: {
+                    label: `${
+                        props.card.is_submitted ? "Submitted" : "Pending"
+                    }`,
+                    color: `${props.card.is_submitted ? "green" : "yellow"}`,
+                },
+                contentType: "text",
+                content: [{ text: `Due Date: ${props.card.due_date}` }],
+                button: [
+                    {
+                        label: `${
+                            props.card.is_submitted
+                                ? "View Submission"
+                                : "Submit Assignment"
+                        }`,
+                        link: `#`,
+                    },
+                ],
+            };
+        case "quiz_remaining":
+            case "quiz_results":
+                return {
+                    title: props.card.title,
+                    subtitle: [
+                        { text: props.card.course_code },
+                        { text: props.card.course_name },
+                    ],
+                    tag: {
+                        label: `${
+                            props.card.is_submitted ? "Submitted" : "Pending"
+                        }`,
+                        color: `${props.card.is_submitted ? "green" : "yellow"}`,
+                    },
+                    contentType: "text",
+                    content: [{ text: `Due Date: ${props.card.due_date}` }],
+                    button: [
+                        {
+                            label: `${
+                                props.card.is_submitted
+                                    ? "View Result"
+                                    : "Attempt Quiz"
+                            }`,
+                            link: `#`,
+                        },
+                    ],
+                };
+            */
+
         default:
-            return {}
+            return {};
     }
-}
+};
 </script>

@@ -22,26 +22,33 @@ class AssignmentController extends Controller
         // Query assignments with course details and filter based on submission status
         $assignments = Assignment::query()
             ->with(['course' => function ($query) {
-                $query->select('id', 'course_code', 'name');
+                $query->select('id', 'course_code', 'title');
             }])
             ->with('submissions')
             ->when($tab === 'remaining', function ($query) {
                 return $query->doesntHave('submissions');
             })
             ->when($tab === 'results', function ($query) {
-                return $query->has('submissions');
+                return $query->has('submissions')
+                ->with('submissions.grade');
             })
             ->get()
-            ->map(function ($assignment) {
+            ->map(function ($assignment) use ($tab) {
                 // Add course_code and name to each assignment's response
-                return [
+                $data = [
                     'id' => $assignment->id,
                     'title' => $assignment->title,
                     'due_date' => $assignment->due_date,
                     'course_code' => $assignment->course->course_code,
-                    'course_name' => $assignment->course->name,
+                    'course_title' => $assignment->course->title,
                     'is_submitted' => $assignment->submissions->isNotEmpty(),
                 ];
+                if($tab === 'results'){
+                    $grade = $assignment->submissions->first()->grade;
+                  
+                    $data['grade'] = $grade? $grade->grade : '';
+                }
+                return $data;
             });
 
         // Return the response with assignments and current tab

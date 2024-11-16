@@ -25,6 +25,15 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create users
+        User::factory(1)->create(
+            [
+                'name' => 'Admin',
+                'email' => 'HtY0y@example.com',
+                'role' => 'admin',
+                'password' => 'password',
+                'email_verified_at' => now(),
+            ]
+        );  // 1 admin
         User::factory(10)->create();  // 10 users (admin, teacher, student)
 
         // Create courses
@@ -46,7 +55,7 @@ class DatabaseSeeder extends Seeder
         Grade::factory(20)->create();  // 20 grades
 
         // Create attendance
-        Attendance::factory(30)->create();  // 30 attendance records
+        Attendance::factory(10)->create();  // 30 attendance records
 
         // Create forum posts
         Post::factory(10)->create();  // 10 forum posts
@@ -58,6 +67,6 @@ class DatabaseSeeder extends Seeder
         Slide::factory(10)->create();
 
         // Create Course quick links
-        QuickLink::factory(10)->create();
+        QuickLink::factory(25)->create();
     }
 }

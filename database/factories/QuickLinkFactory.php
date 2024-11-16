@@ -20,7 +20,7 @@ class QuickLinkFactory extends Factory
     {
         return [
             //
-            'course_id' => 1,
+            'course_id' => Course::factory(),
             'text' => $this->faker->sentence(12),
             'url' => $this->faker->url,
         ];

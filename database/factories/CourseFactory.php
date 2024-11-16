@@ -19,7 +19,7 @@ class CourseFactory extends Factory
     {
         return [
             //
-            'name' => $this->faker->word,
+            'title' => $this->faker->word,
             'course_code' => strtoupper($this->faker->bothify('??###')),
             'description' => $this->faker->paragraph(),
             'start_date' => $this->faker->dateTimeBetween('-1 month', 'now'),

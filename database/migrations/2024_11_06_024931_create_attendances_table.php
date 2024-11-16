@@ -17,9 +17,11 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Course::class)->constrained()->cascadeOnDelete();
-            $table->string('status',7); //present, absent
-            $table->string('location')->nullable();
+            $table->string('status',7)->nullable(); //present, absent
             $table->date('date');
+            $table->timestamps('check_in_at')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->timestamps();
         });
     }

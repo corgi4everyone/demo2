@@ -20,7 +20,7 @@ class SlideFactory extends Factory
     {
         return [
             //
-            'course_id' => 1,
+            'course_id' => Course::factory(),
             'title' => $this->faker->sentence,
             'url' => $this->faker->url,
         ];

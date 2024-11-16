@@ -1,7 +1,7 @@
 <script setup>
-import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import TabLayout from '@/Components/TabLayout.vue';
+import { computed } from "vue";
+import { usePage } from "@inertiajs/vue3";
+import TabLayout from "@/Components/TabLayout.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import UltimateCard from "@/Components/UltimateCard.vue";
 
@@ -9,8 +9,8 @@ const props = defineProps({
     courses: Object,
     currentTab: {
         type: String,
-        default: 'ongoing'
-    }
+        default: "ongoing",
+    },
 });
 //console.log(props.courses)
 const page = usePage();
@@ -19,15 +19,15 @@ const contentTabs = computed(() => {
     const currentTab = page.props.tab || props.currentTab;
     return [
         {
-            name: 'Ongoing',
+            name: "Ongoing",
             href: `/course/ongoing`,
-            active: currentTab === 'ongoing'
+            active: currentTab === "ongoing",
         },
         {
-            name: 'Completed',
+            name: "Completed",
             href: `/course/completed`,
-            active: currentTab === 'completed'
-        }
+            active: currentTab === "completed",
+        },
     ];
 });
 </script>
@@ -46,19 +46,30 @@ const contentTabs = computed(() => {
 
         <!-- Content Area -->
 
-            <div v-if="courses" class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0">
-                <UltimateCard
-                    v-for="course in courses"
-                    :key="course.id"
-                    :title="course.name"
-                    :content="[{ label: 'Course Completed', progress: course.progress }]"
-                    :button="[{ label: 'View Course', link: `${route('course.show', { course: course.id, tab: 'slides' })}` }]"
-                    content-type="progress"
-                    :subtitle="[course.course_code]" />
-            </div>
-            <div v-else class="text-center text-gray-500">
-                No courses found.
-            </div>
-
+        <div
+            v-if="courses"
+            class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0"
+        >
+            <UltimateCard
+                v-for="course in courses"
+                :key="course.id"
+                :title="course.title"
+                :content="[
+                    { label: 'Course Completed', progress: course.progress },
+                ]"
+                :button="[
+                    {
+                        label: 'View Course',
+                        link: `${route('course.show', {
+                            course: course.id,
+                            tab: 'slides',
+                        })}`,
+                    },
+                ]"
+                content-type="progress"
+                :subtitle="[course.course_code]"
+            />
+        </div>
+        <div v-else class="text-center text-gray-500">No courses found.</div>
     </AppLayout>
 </template>

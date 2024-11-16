@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,6 +27,10 @@ Route::get('/course/{course}/{tab?}', [CourseController::class, 'show'])->name('
 
 Route::get('/assignment/{tab?}', [AssignmentController::class, 'index'])
     ->name('assignment.index')
+    ->where('tab', 'remaining|results');
+
+Route::get('/quiz/{tab?}', [QuizController::class, 'index'])
+    ->name('quiz.index')
     ->where('tab', 'remaining|results');
 
 

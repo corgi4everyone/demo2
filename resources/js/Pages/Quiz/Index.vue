@@ -1,56 +1,57 @@
+<!-- resources/js/Pages/Quiz/Index.vue -->
 <template>
-    <AppLayout title="Assignments">
+    <AppLayout title="Quizzes">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Assignment
+                Quiz
             </h2>
         </template>
         <div class="mt-6">
             <TabLayout :tabs="contentTabs" variant="secondary" />
         </div>
         <!-- Content Area -->
-
-        <div v-if="assignments">
+        <div v-if="quizzes">
             <div
                 v-if="props.currentTab === 'remaining'"
                 class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0"
             >
                 <SuperCardWrapper
-                    v-for="card in assignments"
+                    v-for="card in quizzes"
                     :card="card"
-                    :cardType="'assignment_' + props.currentTab"
+                    :cardType="'quiz_' + props.currentTab"
                 />
             </div>
             <div v-if="props.currentTab === 'results'">
-                <TableCOMP class="lg:block hidden" :data="assignments" />
+                <TableCOMP class="lg:block hidden" :data="quizzes" />
                 <SuperCardWrapper
                     class="lg:hidden mx-auto"
-                    v-for="card in assignments"
+                    v-for="card in quizzes"
                     :card="card"
-                    :cardType="'assignment_' + props.currentTab"
+                    :cardType="'quiz_' + props.currentTab"
                 />
             </div>
         </div>
-        <div v-else class="text-center text-gray-500">No Assignment found.</div>
+
+        <div v-else class="text-center text-gray-500">No Quiz found.</div>
     </AppLayout>
 </template>
 <script setup>
 import TabLayout from "@/Components/TabLayout.vue";
 import SuperCardWrapper from "@/Components/SuperCardWrapper.vue";
-import TableCOMP from "@/Components/TableCOMP.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
+import TableCOMP from "@/Components/TableCOMP.vue";
 
 const props = defineProps({
-    assignments: Object,
+    quizzes: Object,
     currentTab: {
         type: String,
         default: "Remaining",
     },
 });
 
-//console.log(props.assignments);
+//console.log(props.quizzes);
 
 const page = usePage();
 const contentTabs = computed(() => {
@@ -58,12 +59,12 @@ const contentTabs = computed(() => {
     return [
         {
             name: "Remaining",
-            href: `/assignment/remaining`,
+            href: `/quiz/remaining`,
             active: currentTab === "remaining",
         },
         {
             name: "Results",
-            href: `/assignment/results`,
+            href: `/quiz/results`,
             active: currentTab === "results",
         },
     ];
