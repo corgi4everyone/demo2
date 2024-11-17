@@ -176,7 +176,10 @@ const check = (cardType) => {
                 title: props.card.title,
                 content: [{ text: props.card.content }],
                 contentType: "text",
-                tag: "Unsolved",
+                tag: {
+                    label: 'Unsolved'
+      ,              color: 'yellow',
+                },
                 button: [
                     {
                         label: "Join Discussion",
