@@ -22,7 +22,8 @@ class AttendanceFactory extends Factory
             'user_id' => \App\Models\User::where('role', 'student')->inRandomOrder()->first()->id,
             'course_id' => \App\Models\Course::factory(),
             'status' => $this->faker->randomElement(['present', 'absent']),
-            'location' => $this->faker->city,
+            'latitude' => $this->faker->numberBetween(-90, 90),
+            'longitude' => $this->faker->numberBetween(-180, 180),
             'date' => $this->faker->date(),
         ];
     }
