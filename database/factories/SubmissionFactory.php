@@ -21,8 +21,8 @@ class SubmissionFactory extends Factory
         return [
             //
             'user_id' => User::where('role', 'student')->inRandomOrder()->first()->id,
-            'assignment_id' => \App\Models\Assignment::factory(),
-            //'quiz_id' => \App\Models\Quiz::factory(),
+            //'assignment_id' => \App\Models\Assignment::factory(),
+            'quiz_id' => \App\Models\Quiz::factory(),
         ];
     }
 }

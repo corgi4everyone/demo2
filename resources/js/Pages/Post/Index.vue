@@ -21,7 +21,8 @@
                         type="text"
                         placeholder="Search posts"
                         class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
-                        v-model="searchQuery"
+                        v-model="search"
+                        @input="debouncedSearch"
                     />
                 </div>
 
@@ -29,6 +30,7 @@
                     <select
                         class="appearance-none bg-white border rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-gray-200"
                         v-model="selectedCourse"
+                        @change="filterByCourse"
                     >
                         <option value="*">All Courses</option>
                         <option value="UE150">Computer Science</option>
@@ -56,7 +58,7 @@
 
                     <div class="space-y-6">
                         <div
-                            v-for="post in posts"
+                            v-for="post in posts.data"
                             :key="post.id"
                             class="border-b pb-6 cursor-pointer hover:bg-gray-50 p-4 rounded-lg transition-colors"
                             @click="selectPost(post.id)"
@@ -82,11 +84,20 @@
                     <div class="flex justify-between items-center mt-6">
                         <button
                             class="text-gray-600 hover:text-gray-900"
-                            :disabled="currentPage === 1"
+                            :disabled="!posts.prev_page_url"
+                            @click="changePage(posts.current_page - 1)"
                         >
                             &lt; previous
                         </button>
-                        <button class="text-gray-600 hover:text-gray-900">
+                        <span
+                            >Page {{ posts.current_page }} of
+                            {{ posts.last_page }}</span
+                        >
+                        <button
+                            class="text-gray-600 hover:text-gray-900"
+                            :disabled="!posts.next_page_url"
+                            @click="changePage(posts.current_page + 1)"
+                        >
                             next &gt;
                         </button>
                     </div>
@@ -105,7 +116,7 @@
                         <!-- Post Comments -->
                         <div class="space-y-6">
                             <div
-                                v-for="comment in selectedPost.comments"
+                                v-for="comment in comments.data"
                                 :key="comment.id"
                                 class="border-b pb-6"
                             >
@@ -131,6 +142,35 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Comment Pagination -->
+                        <div
+                            class="flex justify-between items-center mt-6"
+                            v-if="comments.data && comments.data.length > 0"
+                        >
+                            <button
+                                class="text-gray-600 hover:text-gray-900"
+                                :disabled="!comments.prev_page_url"
+                                @click="
+                                    changeCommentPage(comments.current_page - 1)
+                                "
+                            >
+                                &lt; previous
+                            </button>
+                            <span
+                                >Page {{ comments.current_page }} of
+                                {{ comments.last_page }}</span
+                            >
+                            <button
+                                class="text-gray-600 hover:text-gray-900"
+                                :disabled="!comments.next_page_url"
+                                @click="
+                                    changeCommentPage(comments.current_page + 1)
+                                "
+                            >
+                                next &gt;
+                            </button>
                         </div>
 
                         <!-- Comment Box -->
@@ -253,8 +293,10 @@
         </div>
     </AppLayout>
 </template>
+
 <script setup>
-import { ref, computed, toRef } from "vue";
+import { ref, computed, watch } from "vue";
+import { useForm, usePage } from "@inertiajs/vue3";
 import {
     SearchIcon,
     ChevronDownIcon,
@@ -263,74 +305,105 @@ import {
     ImageIcon,
 } from "lucide-vue-next";
 import AppLayout from "@/Layouts/AppLayout.vue";
-import axios from "axios";
+import { debounce } from "lodash";
 
-const searchQuery = ref("");
-const selectedCourse = ref("*");
-const commentContent = ref("");
-const currentPage = ref(1);
+const props = defineProps({
+    posts: Object,
+    user: Object,
+    filters: Object,
+});
+
+const page = usePage();
+const form = useForm({
+    search: props.filters.search,
+    course: props.filters.course,
+});
+
+const posts = ref(props.posts);
+const comments = ref({});
 const selectedPostId = ref(null);
+const commentContent = ref("");
 const newDiscussionTitle = ref("");
 const newDiscussionContent = ref("");
 const isNewDiscussionModalOpen = ref(false);
-
-const props = defineProps({
-    posts: Array,
-    user: Object,
-});
-
-const posts = toRef(props, "posts");
+const search = ref(props.filters.search);
+const selectedCourse = ref(props.filters.course || "*");
 
 const selectedPost = computed(() =>
-    posts.value.find((post) => post.id === selectedPostId.value)
+    posts.value.data.find((post) => post.id === selectedPostId.value)
 );
 
-const selectPost = (postId) => {
+const selectPost = async (postId) => {
     selectedPostId.value = postId;
+    await fetchComments(postId);
 };
 
-Echo.private("posts").listen("PostCreated", (e) => {
-    posts.value.unshift(e);
-});
-
-Echo.private("comments").listen("CommentCreated", (e) => {
-    console.log("New comment created:", e.comment);
-    if (selectedPost.value.id === e.comment.post_id) {
-        selectedPost.value.comments.unshift(e.comment);
+const fetchComments = async (postId, page = 1) => {
+    try {
+        const response = await axios.get(route("comment.index", postId), {
+            params: { page },
+        });
+        comments.value = response.data;
+    } catch (error) {
+        console.error("Error fetching comments:", error);
     }
-});
+};
+
+const changePage = (page) => {
+    form.get(route("post.index"), {
+        preserveState: true,
+        preserveScroll: true,
+        only: ["posts"],
+    });
+};
+
+const changeCommentPage = (page) => {
+    if (selectedPost.value) {
+        fetchComments(selectedPost.value.id, page);
+    }
+};
+
+const debouncedSearch = debounce(() => {
+    form.search = search.value;
+    form.get(route("post.index"), {
+        preserveState: true,
+        preserveScroll: true,
+        only: ["posts"],
+    });
+}, 300);
+
+const filterByCourse = () => {
+    form.course = selectedCourse.value;
+    form.get(route("post.index"), {
+        preserveState: true,
+        preserveScroll: true,
+        only: ["posts"],
+    });
+};
 
 const createNewDiscussion = () => {
     if (newDiscussionTitle.value.trim() && newDiscussionContent.value.trim()) {
-        // Create a new post object
         const newPost = {
-            id: Date.now(),
             title: newDiscussionTitle.value,
-            created_at: new Date().toLocaleString(),
-            course_code: selectedCourse.value,
             content: newDiscussionContent.value,
-            comments: [],
+            course_code: selectedCourse.value,
         };
 
-        axios.post(route("post.store"), newPost).then(() => {});
-
-        // Add the new post to the posts array
-        posts.value.unshift(newPost);
-
-        // Close the modal and reset form fields
-        isNewDiscussionModalOpen.value = false;
-        newDiscussionTitle.value = "";
-        newDiscussionContent.value = "";
-
-        // Select the newly created Post
-        selectPost(newPost.id);
+        axios.post(route("post.store"), newPost).then(() => {
+            isNewDiscussionModalOpen.value = false;
+            newDiscussionTitle.value = "";
+            newDiscussionContent.value = "";
+            form.get(route("post.index"), {
+                preserveState: true,
+                preserveScroll: true,
+                only: ["posts"],
+            });
+        });
     }
 };
 
 const submitComment = () => {
     if (commentContent.value.trim() && selectedPost.value) {
-        // Implement comment submission logic
-
         const comment = {
             user_id: props.user.id,
             post_id: selectedPost.value.id,
@@ -339,12 +412,36 @@ const submitComment = () => {
 
         axios
             .post(route("comment.store", selectedPost.value.id), comment)
-            .then((response) => {
-                console.log(response);
+            .then(() => {
+                commentContent.value = "";
+                fetchComments(selectedPost.value.id);
             })
             .catch((error) => {
-                console.error(error); // added error handling
+                console.error(error);
             });
     }
 };
+
+watch(
+    () => page.props.posts,
+    (newPosts) => {
+        posts.value = newPosts;
+    }
+);
+
+// Listen for new posts
+Echo.private("posts").listen("PostCreated", (e) => {
+    form.get(route("post.index"), {
+        preserveState: true,
+        preserveScroll: true,
+        only: ["posts"],
+    });
+});
+
+// Listen for new comments
+Echo.private("comments").listen("CommentCreated", (e) => {
+    if (selectedPost.value && selectedPost.value.id === e.comment.post_id) {
+        fetchComments(selectedPost.value.id);
+    }
+});
 </script>

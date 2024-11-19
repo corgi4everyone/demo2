@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\QuizController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +24,7 @@ Route::get('/course/{tab?}', [CourseController::class, 'index'])
     ->where('tab', 'ongoing|completed');
 
 Route::get('/course/create', [CourseController::class, 'create']);
-Route::post('/course/', [CourseController::class, 'store']);
+
 Route::get('/course/{course}/{tab?}', [CourseController::class, 'show'])->name('course.show');
 
 Route::get('/assignment/{tab?}', [AssignmentController::class, 'index'])
@@ -32,6 +34,8 @@ Route::get('/assignment/{tab?}', [AssignmentController::class, 'index'])
 Route::get('/quiz/{tab?}', [QuizController::class, 'index'])
     ->name('quiz.index')
     ->where('tab', 'remaining|results');
+
+
 
 
 Route::middleware([
@@ -44,4 +48,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::get('/course', [CourseController::class, 'index'])->name('course.index');
+    Route::resource('post', PostController::class);
+    Route::post('/post/{post}/comment', [CommentController::class, 'store'])->name('comment.store');
+    Route::get('/post/{post}/comment', [CommentController::class, 'index'])->name('comment.index');
 });

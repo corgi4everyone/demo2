@@ -13,29 +13,14 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
         //
-        $query = Post::with('user', 'course', 'comments.user')->latest();
-
-        if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%')
-                  ->orWhere('content', 'like', '%' . $request->search . '%');
-        }
-        if ($request->has('course') && $request->course !== '*') {
-            $query->whereHas('course', function ($q) use ($request) {
-                $q->where('course_code', $request->course);
-            });
-        }
-
-        $posts = $query->paginate(10)->withQueryString();
-
+        $posts = Post::with('user', 'course', 'comments.user')->latest()->get();
         return Inertia::render('Post/Index', [
             'posts' => $posts,
             'user' => auth()->user(),
-            'filters' => $request->only(['search', 'course']),
         ]);
-
     }
 
     /**
