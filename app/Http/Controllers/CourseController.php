@@ -31,8 +31,12 @@ class CourseController extends Controller
                     ? min(100, max(0, ($daysElapsed / $totalDuration) * 100))
                     : 0;
 
-                $course->progress = round($progress);
-                return $course;
+                return [
+                    'id' => $course->id,
+                    'title' => $course->title,
+                    'progress' => round($progress),
+                    'course_code' => $course->course_code,
+                ];
             });
 
         if (!in_array($tab, ['ongoing', 'completed'])) {
@@ -41,33 +45,32 @@ class CourseController extends Controller
 
         return Inertia::render('Course/Index', [
             'courses' => $courses,
-            'currentTab' => $tab,
         ]);
     }
 
     //create
     public function create()
     {
-        return inertia('Course/Create',[
+        return inertia('Course/Create', [
             //
         ]);
     }
     //store
 
     //show
-//    public function show(Course $course)
-//    {
-//
-//        $course = Course::with('slides', 'assignments', 'forumPosts', 'quizzes')->get();
-//        return inertia('Course/Show', [
-//            'course' => $course,
-//        ]);
-//    }
+    //    public function show(Course $course)
+    //    {
+    //
+    //        $course = Course::with('slides', 'assignments', 'forumPosts', 'quizzes')->get();
+    //        return inertia('Course/Show', [
+    //            'course' => $course,
+    //        ]);
+    //    }
 
     public function show(Course $course, $tab = 'slides')
     {
         // Load relationships based on current tab
-        $course->load(match($tab) {
+        $course->load(match ($tab) {
             'slides' => ['slides', 'quickLinks'],
             'assignments' => ['assignments'],
             'quizzes' => ['quizzes'],
@@ -77,8 +80,6 @@ class CourseController extends Controller
 
         return Inertia::render('Course/Show', [
             'course' => $course,
-            'currentTab' => $tab,
-            'tab' => $tab, // Add this line
         ]);
     }
 

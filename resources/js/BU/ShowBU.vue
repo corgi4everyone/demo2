@@ -1,18 +1,17 @@
 <script setup>
-import { computed } from 'vue';
-import TabLayout from '@/Components/TabLayout.vue';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import {usePage} from "@inertiajs/vue3";
+import { computed } from "vue";
+import TabLayout from "@/Components/TabComponent.vue";
+import AppLayout from "@/Layouts/AppLayout.vue";
+import { usePage } from "@inertiajs/vue3";
 import UltimateCard from "@/Components/UltimateCard.vue";
 
 const props = defineProps({
     course: Object,
     currentTab: {
         type: String,
-        default: 'slides'
-    }
+        default: "slides",
+    },
 });
-
 
 const page = usePage();
 
@@ -20,12 +19,48 @@ const page = usePage();
 const contentTabs = computed(() => {
     const currentTab = page.props.tab || props.currentTab;
     return [
-    { name: 'Slides', href: route('course.show', { course: props.course.id, tab: 'slides' }), active: currentTab === 'slides' },
-    { name: 'Assignments', href: route('course.show', { course: props.course.id, tab: 'assignments' }), active: currentTab === 'assignments' },
-    { name: 'Quizzes', href: route('course.show', { course: props.course.id, tab: 'quizzes' }), active: currentTab === 'quizzes'},
-    { name: 'Forum', href: route('course.show', { course: props.course.id, tab: 'forum_posts' }), active: currentTab === 'forum_posts' },
-        { name: 'Quick Links', href: route('course.show', { course: props.course.id, tab: 'quick_links' }), active: currentTab === 'quick_links'},
-]});
+        {
+            name: "Slides",
+            href: route("course.show", {
+                course: props.course.id,
+                tab: "slides",
+            }),
+            active: currentTab === "slides",
+        },
+        {
+            name: "Assignments",
+            href: route("course.show", {
+                course: props.course.id,
+                tab: "assignments",
+            }),
+            active: currentTab === "assignments",
+        },
+        {
+            name: "Quizzes",
+            href: route("course.show", {
+                course: props.course.id,
+                tab: "quizzes",
+            }),
+            active: currentTab === "quizzes",
+        },
+        {
+            name: "Forum",
+            href: route("course.show", {
+                course: props.course.id,
+                tab: "forum_posts",
+            }),
+            active: currentTab === "forum_posts",
+        },
+        {
+            name: "Quick Links",
+            href: route("course.show", {
+                course: props.course.id,
+                tab: "quick_links",
+            }),
+            active: currentTab === "quick_links",
+        },
+    ];
+});
 </script>
 
 <template>
@@ -41,7 +76,9 @@ const contentTabs = computed(() => {
         </div>
 
         <!-- Content Area -->
-        <div class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0">
+        <div
+            class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0"
+        >
             <!-- <slot></slot>
             [ { "id": 1,
             "course_id": 161,
@@ -50,7 +87,7 @@ const contentTabs = computed(() => {
             "created_at": "2024-11-12T13:34:42.000000Z",
             "updated_at": "2024-11-12T13:34:42.000000Z" } ]
             -->
-            {{course[currentTab]}}
+            {{ course[currentTab] }}
 
             <!--
             <UltimateCard

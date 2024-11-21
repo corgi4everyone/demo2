@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { usePage } from "@inertiajs/vue3";
-import TabLayout from "@/Components/TabLayout.vue";
+import TabLayout from "@/Components/TabComponent.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import UltimateCard from "@/Components/UltimateCard.vue";
 

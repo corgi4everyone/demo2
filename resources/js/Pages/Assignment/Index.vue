@@ -35,7 +35,7 @@
     </AppLayout>
 </template>
 <script setup>
-import TabLayout from "@/Components/TabLayout.vue";
+import TabLayout from "@/Components/TabComponent.vue";
 import SuperCardWrapper from "@/Components/SuperCardWrapper.vue";
 import TableCOMP from "@/Components/TableCOMP.vue";
 import AppLayout from "@/Layouts/AppLayout.vue";

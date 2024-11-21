@@ -1,58 +1,56 @@
-<script setup>
-import { computed } from "vue";
-import { usePage } from "@inertiajs/vue3";
-import TabLayout from "@/Components/TabLayout.vue";
-import AppLayout from "@/Layouts/AppLayout.vue";
+<script>
+import NavLink from "@/Components/NavLink.vue";
 import SuperCardWrapper from "@/Components/SuperCardWrapper.vue";
+import TabComponent from "@/Components/TabComponent.vue";
+import MainLayout from "@/Layouts/MainLayout.vue";
 
-const props = defineProps({
-    courses: Object,
-    currentTab: {
-        type: String,
-        default: "ongoing",
+export default {
+    components: {
+        SuperCardWrapper,
+        MainLayout,
+        NavLink,
+        TabComponent,
     },
-});
-const page = usePage();
-
-const contentTabs = computed(() => {
-    const currentTab = page.props.tab || props.currentTab;
-    return [
-        {
-            name: "Ongoing",
-            href: `/course/ongoing`,
-            active: currentTab === "ongoing",
-        },
-        {
-            name: "Completed",
-            href: `/course/completed`,
-            active: currentTab === "completed",
-        },
-    ];
-});
+    props: {
+        courses: Array,
+    },
+};
 </script>
 
 <template>
-    <AppLayout title="Courses">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Course
-            </h2>
+    <!-- Content Tabs -->
+    <MainLayout>
+        <template #links>
+            <TabComponent
+                href="/courses/ongoing"
+                label="Ongoing"
+                :defaultActive="
+                    $page.url == '/courses/ongoing' || $page.url == '/courses'
+                        ? true
+                        : false
+                "
+            />
+            <TabComponent href="/courses/completed" label="Completed" />
         </template>
-        <!-- Content Tabs -->
-        <div class="mt-6">
-            <TabLayout :tabs="contentTabs" variant="secondary" />
-        </div>
+
         <!-- Content Area -->
         <div
             v-if="courses"
-            class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0"
+            class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0 mt-6"
         >
             <SuperCardWrapper
-                v-for="card in courses"
-                :card="card"
-                :cardType="'course_' + props.currentTab"
+                v-for="course in courses"
+                :card="course"
+                :key="course.id"
+                :cardType="
+                    $page.url.split('/')[2]
+                        ? $page.url.split('/')[1] +
+                          '/' +
+                          $page.url.split('/')[2]
+                        : $page.url.split('/')[1] + '/ongoing'
+                "
             />
         </div>
         <div v-else class="text-center text-gray-500">No courses found.</div>
-    </AppLayout>
+    </MainLayout>
 </template>

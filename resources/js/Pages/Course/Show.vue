@@ -1,97 +1,82 @@
 <!-- resources/js/Pages/Course/Show.vue -->
-<script setup>
-import { computed } from "vue";
-import TabLayout from "@/Components/TabLayout.vue";
-import AppLayout from "@/Layouts/AppLayout.vue";
-import { usePage } from "@inertiajs/vue3";
+<script>
 import SuperCardWrapper from "@/Components/SuperCardWrapper.vue";
 import CourseReferences from "@/Components/CourseReferences.vue";
+import MainLayout from "@/Layouts/MainLayout.vue";
+import TabComponent from "@/Components/TabComponent.vue";
 
-const props = defineProps({
-    course: Object,
-    currentTab: {
-        type: String,
-        default: "slides",
+export default {
+    components: {
+        TabComponent,
+        SuperCardWrapper,
+        CourseReferences,
+        MainLayout,
     },
-});
-
-const page = usePage();
-const contentTabs = computed(() => {
-    const currentTab = page.props.tab || props.currentTab;
-    return [
-        {
-            name: "Slides",
-            href: route("course.show", {
-                course: props.course.id,
-                tab: "slides",
-            }),
-            active: currentTab === "slides",
-        },
-        {
-            name: "Assignments",
-            href: route("course.show", {
-                course: props.course.id,
-                tab: "assignments",
-            }),
-            active: currentTab === "assignments",
-        },
-        {
-            name: "Quizzes",
-            href: route("course.show", {
-                course: props.course.id,
-                tab: "quizzes",
-            }),
-            active: currentTab === "quizzes",
-        },
-        {
-            name: "Forum",
-            href: route("course.show", {
-                course: props.course.id,
-                tab: "forum_posts",
-            }),
-            active: currentTab === "forum_posts",
-        },
-    ];
-});
-
-const cardsData = computed(() => {
-    return props.course[props.currentTab] || [];
-});
+    props: {
+        course: Object,
+    },
+};
 </script>
 
 <template>
-    <AppLayout :title="course.title">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ course.title }}
-            </h2>
+    <MainLayout>
+        <template #links>
+            <TabComponent
+                :href="`/courses/${course.id}/slides`"
+                label="Slides"
+                :defaultActive="
+                    $page.url == `/courses/${course.id}/slides` ||
+                    $page.url == `/courses/${course.id}`
+                        ? true
+                        : false
+                "
+            />
+            <TabComponent
+                :href="`/courses/${course.id}/assignments`"
+                label="Assignments"
+            />
+            <TabComponent
+                :href="`/courses/${course.id}/quizzes`"
+                label="Quizzes"
+            />
+            <TabComponent
+                :href="`/courses/${course.id}/forum_posts`"
+                label="Forum"
+            />
         </template>
-        <div class="mt-6">
-            <TabLayout :tabs="contentTabs" variant="secondary" />
-        </div>
+
         <div class="flex gap-6">
             <div
                 :class="
-                    props.currentTab === 'slides' ? 'w-full lg:w-4/5' : 'w-full'
+                    $page.url.split('/')[3] === 'slides'
+                        ? 'w-full lg:w-4/5'
+                        : 'w-full'
                 "
             >
                 <div
-                    class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0"
+                    class="grid lg:grid-cols-3 md:grid-cols-2 gap-6 justify-items-center sm:px-0 mt-6"
                 >
                     <SuperCardWrapper
-                        v-for="card in cardsData"
-                        :card="card"
-                        :cardType="'course_' + props.currentTab"
+                        v-for="slide in course.slides"
+                        :card="slide"
+                        :key="slide.id"
+                        :cardType="
+                            $page.url.split('/')[3]
+                                ? $page.url.split('/')[1] +
+                                  '/' +
+                                  $page.url.split('/')[3]
+                                : $page.url.split('/')[1] + '/slides'
+                        "
                     />
                 </div>
             </div>
 
             <div
-                v-if="props.currentTab === 'slides'"
+                v-if="$page.url.split('/')[3] === 'slides'"
                 class="lg:block hidden w-full lg:w-1/5"
             >
                 <CourseReferences :references="course.quick_links" />
             </div>
         </div>
-    </AppLayout>
+    </MainLayout>
 </template>

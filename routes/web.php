@@ -19,13 +19,13 @@ Route::get('/', function () {
 });
 
 
-Route::get('/course/{tab?}', [CourseController::class, 'index'])
+Route::get('/courses/{tab?}', [CourseController::class, 'index'])
     ->name('course.index')
     ->where('tab', 'ongoing|completed');
 
-Route::get('/course/create', [CourseController::class, 'create']);
+Route::get('/courses/create', [CourseController::class, 'create']);
 
-Route::get('/course/{course}/{tab?}', [CourseController::class, 'show'])->name('course.show');
+Route::get('/courses/{course}/{tab?}', [CourseController::class, 'show'])->name('course.show');
 
 Route::get('/assignment/{tab?}', [AssignmentController::class, 'index'])
     ->name('assignment.index')
@@ -47,7 +47,7 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
-    Route::get('/course', [CourseController::class, 'index'])->name('course.index');
+    Route::get('/courses', [CourseController::class, 'index'])->name('course.index');
     Route::resource('post', PostController::class);
     Route::post('/post/{post}/comment', [CommentController::class, 'store'])->name('comment.store');
     Route::get('/post/{post}/comment', [CommentController::class, 'index'])->name('comment.index');
